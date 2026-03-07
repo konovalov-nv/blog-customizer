@@ -19,16 +19,12 @@ import {
 import { Separator } from 'src/ui/separator';
 
 type ArticleParamsFormProps = {
-	isOpen: boolean;
-	onToggle: () => void;
 	currentState: ArticleStateType;
 	onApply: (state: ArticleStateType) => void;
 	onReset: () => void;
 };
 
 export const ArticleParamsForm = ({
-	isOpen,
-	onToggle,
 	currentState,
 	onApply,
 	onReset,
@@ -36,6 +32,7 @@ export const ArticleParamsForm = ({
 	const asideRef = useRef<HTMLElement>(null);
 	const arrowButtonRef = useRef<HTMLDivElement>(null);
 
+	const [isOpen, setIsOpen] = useState(false);
 	const [formData, setFormData] = useState<ArticleStateType>(currentState);
 
 	useEffect(() => {
@@ -43,9 +40,11 @@ export const ArticleParamsForm = ({
 	}, [currentState]);
 
 	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (!isOpen) return;
+		if (!isOpen) {
+			return;
+		}
 
+		const handleClickOutside = (event: MouseEvent) => {
 			if (asideRef.current && asideRef.current.contains(event.target as Node)) {
 				return;
 			}
@@ -57,7 +56,7 @@ export const ArticleParamsForm = ({
 				return;
 			}
 
-			onToggle();
+			setIsOpen(false);
 		};
 
 		document.addEventListener('mousedown', handleClickOutside);
@@ -65,12 +64,12 @@ export const ArticleParamsForm = ({
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen, onToggle]);
+	}, [isOpen]);
 
 	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		onApply(formData);
-		onToggle();
+		setIsOpen(false);
 	};
 
 	const handleReset = () => {
@@ -90,7 +89,11 @@ export const ArticleParamsForm = ({
 
 	return (
 		<>
-			<ArrowButton ref={arrowButtonRef} isOpen={isOpen} onClick={onToggle} />
+			<ArrowButton
+				ref={arrowButtonRef}
+				isOpen={isOpen}
+				onClick={() => setIsOpen(!isOpen)}
+			/>
 			<aside
 				ref={asideRef}
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
